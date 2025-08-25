@@ -11,8 +11,7 @@ namespace HotelManagement.Services
     {
         private readonly List<Room> _rooms;
         private readonly List<Customer> _customers;
-        private readonly List<Reservation> _reservations;
-
+        private readonly List<Reservation> _reservations = new();
         private int _nextReservationCount = 1;
 
         public ReservationService(List<Room> rooms, List<Customer> customers)
@@ -31,10 +30,18 @@ namespace HotelManagement.Services
             var nights = checkOut.DayNumber - checkIn.DayNumber;
             var total = nights * room.Price;
 
-            var res2 = new Reservation(_nextReservationCount, roomID, customerId, checkIn, checkOut, total);
+            var res = new Reservation
+            {
+                Id = _nextReservationCount,
+                RoomId = roomID,
+                CustomerId = customerId,
+                CheckIn = checkIn,
+                CheckOut = checkOut,
+                Total = total,
+            };
 
-            _reservations.Add(res2);
-            return res2;
+            _reservations.Add(res);
+            return res;
         }
 
         public IEnumerable<Reservation> GetAllReservations() => _reservations;

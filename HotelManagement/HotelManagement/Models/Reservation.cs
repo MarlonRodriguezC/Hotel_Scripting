@@ -8,7 +8,6 @@ namespace HotelManagement.Models
 {
     public class Reservation
     {
-
         public int Id { get; init; }
         public int RoomId { get; init; }
         public int CustomerId { get; init; }
@@ -18,14 +17,5 @@ namespace HotelManagement.Models
 
         public override string ToString()
             => $"Res#{Id} - Room:{RoomId} Customer:{CustomerId} {CheckIn:yyyy-MM-dd}→{CheckOut:yyyy-MM-dd} Total ${Total:0.00}";
-        public Reservation(int id, int roomId, int customerId, DateOnly checkIn, DateOnly checkOut, decimal total)
-        {
-            Id = id;
-            RoomId = roomId;
-            CustomerId = customerId;
-            CheckIn = checkIn;
-            CheckOut = checkOut;
-            Total = total;
-        }
     }
 }

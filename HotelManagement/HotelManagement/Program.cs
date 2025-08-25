@@ -19,8 +19,10 @@ var service = new ReservationService(rooms, customers);
 var checkin = new DateOnly(2025, 8, 24);
 var checkout = new DateOnly(2025, 8, 29);
 
-var response = service.CreaReservation(1, 1, checkin, checkout);
-Console.WriteLine(response);
+service.CreaReservation(1, 1, checkin, checkout);
+service.CreaReservation(2, 2, checkin, checkout);
+
+//Console.WriteLine(response);
 
 foreach (var r in service.GetAllReservations())
 {
