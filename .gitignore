@@ -1,0 +1,14 @@
+# Visual Studio
+**/.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build
+**/bin/
+**/obj/
+
+# Otros temporales
+*.vsidx
+*.log
