@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HotelManagement.Models;
 
 namespace HotelManagement.Services
@@ -21,9 +19,15 @@ namespace HotelManagement.Services
             _customers = customers;
         }
 
-        public bool IsRoomAvailable(int roomId, DateOnly from, DateOnly to)
+        private static bool Overlap(DateOnly aStart, DateOnly aEnd, DateOnly bStart, DateOnly bEnd)
+            => aStart < bEnd && bStart < aEnd;
+
+        public bool IsRoomAvailable(int roomId, DateOnly from, DateOnly to, int excludeReservationId = 0)
         {
-            return !_reservations.Any(r => r.RoomId == roomId && Overlap(r.CheckIn, r.CheckOut, from, to));
+            return !_reservations.Any(r =>
+                r.RoomId == roomId &&
+                r.Id != excludeReservationId &&
+                Overlap(r.CheckIn, r.CheckOut, from, to));
         }
 
         public Reservation? CreateReservation(int roomId, int customerId, DateOnly checkIn, DateOnly checkOut, IPricingStrategy pricingStrategy)
@@ -52,9 +56,48 @@ namespace HotelManagement.Services
             return res;
         }
 
-        public IEnumerable<Reservation> GetAllReservations() => _reservations;
+        public bool CancelReservation(int reservationId)
+        {
+            var reservation = _reservations.FirstOrDefault(r => r.Id == reservationId);
+            if (reservation is null) return false;
 
-        private static bool Overlap(DateOnly aStart, DateOnly aEnd, DateOnly bStart, DateOnly bEnd)
-            => aStart < bEnd && bStart < aEnd;
+            return _reservations.Remove(reservation);
+        }
+
+        public Reservation? UpdateReservation(
+            int reservationId,
+            DateOnly newCheckIn,
+            DateOnly newCheckOut,
+            IPricingStrategy pricingStrategy)
+        {
+            var existingRes = _reservations.FirstOrDefault(r => r.Id == reservationId);
+            if (existingRes is null) return null;
+
+            if (newCheckOut <= newCheckIn) return null;
+
+            if (!IsRoomAvailable(existingRes.RoomId, newCheckIn, newCheckOut, existingRes.Id))
+            {
+                return null; 
+            }
+
+            var room = _rooms.First(r => r.Id == existingRes.RoomId);
+            var newTotal = pricingStrategy.CalculateTotal(room, newCheckIn, newCheckOut);
+            var updatedRes = new Reservation
+            {
+                Id = existingRes.Id,
+                RoomId = existingRes.RoomId,
+                CustomerId = existingRes.CustomerId,
+                CheckIn = newCheckIn,
+                CheckOut = newCheckOut,
+                Total = newTotal 
+            };
+
+            _reservations.Remove(existingRes);
+            _reservations.Add(updatedRes);
+
+            return updatedRes;
+        }
+
+        public IEnumerable<Reservation> GetAllReservations() => _reservations;
     }
 }
