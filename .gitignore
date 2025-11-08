@@ -6,7 +6,6 @@
 *.sln.docstates
 
 # Build
-**/bin/
 **/obj/
 
 # Otros temporales
